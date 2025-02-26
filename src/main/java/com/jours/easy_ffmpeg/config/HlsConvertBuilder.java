@@ -1,8 +1,6 @@
 package com.jours.easy_ffmpeg.config;
 
-
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import com.jours.easy_ffmpeg.secure.EncryptionKey;
 
 public class HlsConvertBuilder {
 
@@ -15,7 +13,7 @@ public class HlsConvertBuilder {
     private SegmentType segmentType = SegmentType.MPEGTS;  // mpegts or fmp4
     private int keyFrameInterval = 2;       // 키프레임 간격
     private boolean encryption = false;      // HLS 암호화 여부
-    private String keyInfoFile = null;      // 암호화 키 정보
+    private EncryptionKey encryptionKey = null;      // 암호화 키 정보
     private PlaylistType playlistType = PlaylistType.VOD;      // VOD or EVENT
     private boolean discontinuity = false;   // 세그먼트 불연속성 표시
     private int startNumber = 0;            // 세그먼트 시작 번호
@@ -35,9 +33,14 @@ public class HlsConvertBuilder {
         return this;
     }
 
-    public HlsConvertBuilder enableEncryption(String keyInfoFile) {
+    public HlsConvertBuilder enableEncryption(FFmpegConfigurer<EncryptionKey.EncryptionKeyBuilder> encryptionKeyBuilder) {
         this.encryption = true;
-        this.keyInfoFile = keyInfoFile;
+        this.encryptionKey = encryptionKeyBuilder.apply(EncryptionKey.builder()).build();
+        return this;
+    }
+    public HlsConvertBuilder enableEncryption() {
+        this.encryption = true;
+        this.encryptionKey = EncryptionKey.builder().build();
         return this;
     }
 
@@ -90,11 +93,11 @@ public class HlsConvertBuilder {
         if (segmentDigits <= 0) {
             throw new IllegalStateException("Segment digits must be greater than 0");
         }
-        if (encryption && (keyInfoFile == null || keyInfoFile.isBlank())) {
+        if (encryption && encryptionKey == null) {
             throw new IllegalStateException("Key info file must be provided when encryption is enabled");
         }
-        if (keyInfoFile != null && !Files.exists(Paths.get(keyInfoFile))) {
-            throw new IllegalStateException("Key info file does not exist: " + keyInfoFile);
+        if (encryptionKey != null) {
+            encryptionKey.validate();
         }
         if (playlistType == null) {
             throw new IllegalStateException("Playlist type must be either 'vod' or 'event'");
@@ -128,8 +131,8 @@ public class HlsConvertBuilder {
         return masterName;
     }
 
-    protected String getSegmentType() {
-        return segmentType.getType();
+    protected SegmentType getSegmentType() {
+        return segmentType;
     }
 
     protected int getKeyFrameInterval() {
@@ -140,8 +143,8 @@ public class HlsConvertBuilder {
         return encryption;
     }
 
-    protected String getKeyInfoFile() {
-        return keyInfoFile;
+    protected EncryptionKey getEncryptionKey() {
+        return encryptionKey;
     }
 
     protected String getPlaylistType() {

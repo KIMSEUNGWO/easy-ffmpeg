@@ -70,8 +70,8 @@ class FFmpegCommand {
         }
 
         // 암호화 설정
-        if (config.isEncryption() && config.getKeyInfoFile() != null) {
-            options.addAll(List.of("-hls_key_info_file", config.getKeyInfoFile()));
+        if (config.isEncryption() && config.getEncryptionKey() != null) {
+            options.addAll(List.of("-hls_key_info_file", config.getEncryptionKey().getKeyInfoPath().toString()));
         }
 
         // 재생목록 타입 설정
