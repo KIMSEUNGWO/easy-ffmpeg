@@ -23,10 +23,10 @@ public class HlsConvertBuilder {
         this.debug = true;
         return this;
     }
-    public HlsConvertBuilder segmentType(SegmentType type) {
-        this.segmentType = type;
-        return this;
-    }
+//    public HlsConvertBuilder segmentType(SegmentType type) {
+//        this.segmentType = type;
+//        return this;
+//    }
 
     public HlsConvertBuilder keyFrameInterval(int interval) {
         this.keyFrameInterval = interval;
